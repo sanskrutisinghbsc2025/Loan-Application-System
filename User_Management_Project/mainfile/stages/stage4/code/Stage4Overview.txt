@@ -1,0 +1,73 @@
+================================================================================
+                    STAGE 4: IMPLEMENTATION FILES & ARCHITECTURE
+================================================================================
+
+1. OVERVIEW
+--------------------------------------------------------------------------------
+Stage 4 introduces the PAN & CIBIL Intelligence Module:
+- PAN Card Validation: Enforces ^[A-Z]{5}[0-9]{4}[A-Z]{1}$ with exact error message:
+  "Invalid PAN format. Please enter a valid PAN."
+- Loan Type Validation: Enforces Home Loan, Personal Loan, Education Loan, Vehicle Loan
+  with exact error message: "Invalid loan type selected."
+- CIBIL Score Generation: Generates random 3-digit score strictly between 600 and 900.
+- Interest Rate Calculation Engine: Maps CIBIL score to defined interest rate ranges:
+  * Home Loan: 6.5% – 8.5%
+  * Personal Loan: 9.0% – 12.0%
+  * Education Loan: 4.0% – 6.0%
+  * Vehicle Loan: 7.0% – 9.0%
+  Exact output string format:
+  "For PAN [PAN], with a CIBIL score of [CIBIL], the interest rate for [Loan Type] is [Rate]%."
+- Auto-Generation of Credentials:
+  * Username: First 3 letters of First Name + First 3 letters of Last Name + Last 4 digits of Mobile.
+    (Example: Shivani + Chaudhari + 9876543210 -> ShiCha3210).
+  * Password: 8-10 characters containing letters, numbers, and symbols (e.g. @Shiv!123).
+  * Email Dispatch of Credentials with subject: "Your Username and Password for Loan Application is".
+- Database persistence: `pancard` and `cibil_score` columns on `users` table.
+- Seamless transition to loan application after CIBIL check.
+
+2. NEW / EXTENDED COMPONENTS IN SHARED
+--------------------------------------------------------------------------------
+Domain Model:
+  * User.java: Added `pancard` (String) and `cibilScore` (Integer).
+
+Validation:
+  * ValidationUtil.java: Added isValidPan(), isValidNameLettersOnly(), isValidLoanType().
+
+Data Access Layer:
+  * UserDao.java & UserDaoImpl.java:
+    - updateCibilAndPan(userId, pancard, cibilScore)
+    - Updated registerUser(), updateUser(), and mapResultSetToUser() with pancard and cibil_score.
+
+Business Logic Layer:
+  * CibilService.java & CibilServiceImpl.java:
+    - generateCibilScore()
+    - calculateInterestRate()
+    - calculate()
+    - generateUsername()
+    - generatePassword()
+    - onboardWithCibil()
+  * NotificationService.java & ConsoleNotificationService.java:
+    - sendCredentialsNotification()
+
+Presentation Layer:
+  * ConsoleMenu.java:
+    - Added "4. CIBIL Score Check & Auto-Generated Credentials (Stage 4)"
+    - Added "5. Interest Rate Calculator with PAN Validation (Stage 4)"
+
+Database Layer:
+  * shared/sql/schema.sql: Added `pancard` and `cibil_score` columns with index on pancard.
+  * shared/sql/seed_stage4.sql: Sample seed data for PAN and CIBIL testing.
+
+3. TEST COVERAGE
+--------------------------------------------------------------------------------
+Directory: shared/tests/java/com/sit/loanapp/
+  * CibilServiceTest.java: 8 comprehensive test suites covering:
+    - Valid PAN patterns
+    - Invalid PAN patterns
+    - CIBIL score bounds (600 to 900)
+    - Interest rate range bounds for all loan types
+    - Calculator workflow and exact output message format
+    - Username generation formula (ShiCha3210)
+    - Password generation complexity
+    - Full CIBIL onboarding workflow with email dispatch and database persistence
+================================================================================

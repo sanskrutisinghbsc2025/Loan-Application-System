@@ -1,0 +1,74 @@
+================================================================================
+STAGE 5: LOAN APPROVAL WITH EMI CALCULATION AND NOTIFICATION
+================================================================================
+
+1. OVERVIEW & USER STORY
+--------------------------------------------------------------------------------
+User Story:
+"As an admin, I want the system to calculate EMI after approving a loan so that
+the user can receive the approved loan details, EMI, total interest, and total
+payable amount through email."
+
+Key Goals:
+- Preserve all existing functionality from Stages 1, 2, 3, and 4 without disruption.
+- Extend Loan Application model, database schema, and DAO layer to support EMI,
+  total interest, and total payable amounts.
+- Implement precise EMI calculation formula using loan amount, tenure, and interest rate.
+- Update loan approval process to persist EMI metrics into MySQL via JDBC.
+- Generate and dispatch comprehensive approval notifications containing all 7
+  mandatory loan parameters to the applicant.
+- Enhance Admin Dashboard to review all loan applications and trigger approvals
+  with instant EMI computation.
+- Maintain console-based Pure Core Java architecture with zero external web frameworks
+  (No Spring Boot, Spring MVC, or Spring Security).
+
+2. DETAILED REQUIREMENTS
+--------------------------------------------------------------------------------
+2.1 Entity Extension
+- Extend the Loan Application entity to record:
+  * emiAmount     : Monthly Equated Installment
+  * totalInterest : Total interest over the entire tenure
+  * totalPayable  : Sum of principal loan amount and total interest
+
+2.2 EMI Calculation Logic
+- Monthly interest rate (r):
+  r = (interestRate / 12) / 100
+- Formula:
+  EMI = [P * r * (1 + r)^n] / [(1 + r)^n - 1]
+  Where:
+  * P = Loan Amount (loanAmount)
+  * r = Monthly interest rate
+  * n = Loan Tenure in months (loanDuration)
+- Total Amounts:
+  * Total Payable Amount = EMI * n
+  * Total Interest = Total Payable Amount - P
+
+2.3 Loan Approval Workflow
+Once the admin approves a loan from the admin console menu:
+1. Validate admin credentials and role (ROLE_ADMIN).
+2. Fetch loan details and verify loan is in a reviewable state.
+3. Update loan status to 'Approved' in MySQL via JDBC PreparedStatement.
+4. Compute EMI, total interest, and total payable amount.
+5. Persist calculated emi_amount, total_interest, and total_payable in MySQL database.
+6. Record administrative action in audit_logs table.
+7. Dispatch formal email notification to the applicant.
+
+2.4 User Email Notification Specifications
+Upon loan approval, the user receives an email containing all 7 parameters:
+1. Sanctioned Loan Amount : loanAmount
+2. Loan Type             : loanType (e.g. Home Loan, Personal Loan)
+3. Loan Tenure           : loanDuration in months
+4. Applied Interest Rate : interestRate (e.g. 7.5%, 10.5%)
+5. Monthly EMI Amount    : emiAmount
+6. Total Interest Amount : totalInterest
+7. Total Payable Amount  : totalPayable
+
+2.5 Admin Dashboard Capabilities
+Console-based Admin Dashboard provides:
+- View All Loans: Display list and full details of all submitted applications.
+- Approve/Reject Loan:
+  * Approve: Calculates EMI, saves to DB, sends 7-point approval email.
+  * Reject: Requires mandatory rejection reason, updates DB, sends rejection email.
+- Send Notification: Real-time automated email notification on approval or rejection.
+- View Audit Logs: Track administrative review actions.
+================================================================================

@@ -1,0 +1,76 @@
+================================================================================
+                    STAGE 3: IMPLEMENTATION FILES & ARCHITECTURE
+================================================================================
+
+1. OVERVIEW
+--------------------------------------------------------------------------------
+Stage 3 introduces the Loan Application Management System, seamlessly extending Stages 1 & 2:
+- User Side:
+  * Regular users can apply for loans through their console menu.
+  * Fields: Loan Amount, Loan Type (Personal, Home, Education, Vehicle), Duration (months),
+    Annual Income, Purpose.
+  * Auto-calculated default interest rate:
+    - Personal Loan: 10.5%
+    - Home Loan: 7.5%
+    - Education Loan: 5.0%
+    - Vehicle / Car Loan: 8.0%
+  * Positive number validation on amount, duration, and income. Mandatory purpose.
+  * Initial status is automatically set to 'Pending'.
+  * Real-time viewing of user's submitted loan applications and current statuses.
+
+- Admin Side:
+  * Admin Loan Review menu: Lists all loan applications with ID, Applicant Name, Type,
+    Amount, Application Date, and Status.
+  * View Full Loan Details with applicant profile details (joined from `users` table).
+  * Approve Loan: Updates status to 'Approved', logs audit record, and sends approval email.
+  * Reject Loan: Requires mandatory rejection reason, updates status to 'Rejected',
+    records rejection reason, logs audit record, and sends rejection email.
+  * Stage 3 Email Notifications strictly formatted:
+    - Approval Subject: "Your Loan Application has been Approved!"
+      Body: "Dear [User], your loan application for [loan amount] has been approved. Please check your dashboard for further details."
+    - Rejection Subject: "Your Loan Application has been Rejected"
+      Body: "Dear [User], we regret to inform you that your loan application has been rejected. Reason: [reason]. Please contact support for more details."
+
+2. NEW / EXTENDED COMPONENTS IN SHARED
+--------------------------------------------------------------------------------
+Domain Model:
+  * LoanApplication.java: Entity encapsulating loan attributes, applicant details, status, and dates.
+
+Data Access Layer:
+  * LoanDao.java & LoanDaoImpl.java:
+    - applyForLoan(loanApplication)
+    - findById(id)
+    - findByUserId(userId)
+    - findAll()
+    - findByStatus(status)
+    - updateLoanStatus(loanId, status, rejectionReason)
+
+Business Logic Layer:
+  * LoanService.java & LoanServiceImpl.java:
+    - Validation of loan bounds and business constraints.
+    - Default interest rate assignment based on loan type.
+    - Approval and rejection workflows with notifications and audit logging.
+  * NotificationService.java & ConsoleNotificationService.java:
+    - Extended with sendLoanApprovedNotification() and sendLoanRejectedNotification().
+
+Presentation Layer:
+  * ConsoleMenu.java:
+    - Activated "2. Apply for Loan" wizard with instant summary and confirmation.
+    - Added "3. View My Loan Applications" for regular users.
+    - Added "7. Review Loan Applications" in Admin Dashboard with full review and approval/rejection loop.
+
+Database Layer:
+  * shared/sql/schema.sql: Added `loan_applications` table with foreign key to `users`.
+  * shared/sql/seed_stage3.sql: Sample loan applications for user testing.
+
+3. TEST COVERAGE
+--------------------------------------------------------------------------------
+Directory: shared/tests/java/com/sit/loanapp/
+  * LoanServiceTest.java: 6 comprehensive test suites covering:
+    - Interest rate assignment across all loan types
+    - Field validations (negative amount, invalid duration, negative income, blank purpose)
+    - Successful submission with 'Pending' status
+    - Admin approval workflow with exact email template and audit logging
+    - Admin rejection workflow with mandatory reason, exact email template, and audit logging
+    - RBAC: regular user rejection from loan review actions
+================================================================================

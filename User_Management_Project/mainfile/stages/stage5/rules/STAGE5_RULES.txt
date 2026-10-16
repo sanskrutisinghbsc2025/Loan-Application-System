@@ -1,0 +1,65 @@
+================================================================================
+STAGE 5: SYSTEM RULES & SPECIFICATIONS
+================================================================================
+
+1. BUSINESS LOGIC RULES
+--------------------------------------------------------------------------------
+1.1 Authorization & Role Constraints:
+- Only users with role 'ROLE_ADMIN' can approve or reject loan applications.
+- Regular users ('ROLE_USER') can view only their own loan applications.
+- Loans that are already in 'Approved' status cannot be re-approved.
+- Loans in 'Rejected' status cannot be approved without explicit workflow override.
+
+1.2 Financial Calculation Rules:
+- Principal P must be > 0.
+- Loan duration n (in months) must be > 0.
+- Annual interest rate r_annual >= 0.
+- If r_annual == 0:
+  * EMI = P / n
+  * Total Payable = P
+  * Total Interest = 0
+- Standard Formula (r_annual > 0):
+  * r_monthly = (r_annual / 12) / 100
+  * factor = (1 + r_monthly) ^ n
+  * EMI = [P * r_monthly * factor] / [factor - 1]
+  * Total Payable = EMI * n
+  * Total Interest = Total Payable - P
+- Rounding:
+  * Currency values are formatted to 2 decimal places (cents/paise) using %.2f.
+
+1.3 Persistence Rules:
+- All database operations MUST use JDBC PreparedStatement to prevent SQL injection.
+- Approval updates MUST atomically record:
+  * status = 'Approved'
+  * emi_amount = calculated EMI
+  * total_interest = calculated total interest
+  * total_payable = calculated total payable
+  * rejection_reason = NULL
+  * last_modified_date = CURRENT_TIMESTAMP
+- Approval action MUST create an audit log entry in audit_logs table:
+  * admin_username = current admin username
+  * action = 'APPROVE_LOAN'
+  * target_user_id = applicant's user ID
+  * target_username = applicant's full name
+  * details = formatted summary including loan type, amount, EMI, and total payable
+
+1.4 Notification Rules:
+- Approval notifications MUST contain all 7 mandatory parameters:
+  1. Sanctioned Loan Amount
+  2. Loan Type
+  3. Loan Tenure (in months)
+  4. Applied Interest Rate (%)
+  5. Monthly EMI Amount
+  6. Total Interest Amount
+  7. Total Payable Amount
+- Notifications must be logged to the console in simulated environment or sent
+  via standard JavaMail SMTP when live credentials are provided.
+
+2. ARCHITECTURAL CONSTRAINTS
+--------------------------------------------------------------------------------
+- Technology: Pure Core Java (JDK 17/21 LTS).
+- Persistence: MySQL 8.0+ / MariaDB via JDBC PreparedStatements.
+- No Spring Boot, Spring MVC, Spring Data, or Spring Security allowed.
+- Zero regression: All stages (1, 2, 3, 4) must continue to function perfectly.
+- Unit Testing: JUnit 5 test suite running against H2 in MySQL compatibility mode.
+================================================================================

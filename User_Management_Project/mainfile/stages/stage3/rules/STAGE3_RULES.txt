@@ -1,0 +1,61 @@
+================================================================================
+                      STAGE 3: RULES & ACCEPTANCE CRITERIA
+================================================================================
+
+1. LOAN APPLICATION VALIDATION RULES
+--------------------------------------------------------------------------------
+[R3.1] Applicants must be active registered users logged into their session.
+[R3.2] Loan Amount must be strictly greater than 0 (> 0).
+[R3.3] Annual Income must be strictly greater than 0 (> 0).
+[R3.4] Loan Duration must be a positive integer in months (> 0).
+[R3.5] Loan Type must be selected from supported types:
+       - Personal Loan
+       - Home Loan
+       - Education Loan
+       - Car / Vehicle Loan
+[R3.6] Interest rate is auto-assigned based on selected loan type.
+[R3.7] Initial application status is always set to 'Pending'.
+[R3.8] Purpose description is mandatory and cannot be blank.
+
+2. ADMIN REVIEW & DECISION RULES
+--------------------------------------------------------------------------------
+[R3.9] Only users with `ROLE_ADMIN` can access the Loan Review module or decide on loans.
+[R3.10] Admin can view complete applicant profiles and loan details.
+[R3.11] Approval Transition:
+        - Changes status to 'Approved'.
+        - Updates `last_modified_date`.
+        - Generates and dispatches approved email notification.
+        - Records action in `audit_logs` table.
+[R3.12] Rejection Transition:
+        - Requires a mandatory rejection reason from the admin.
+        - Changes status to 'Rejected'.
+        - Stores rejection reason in database.
+        - Generates and dispatches rejection email notification containing the reason.
+        - Records action in `audit_logs` table.
+
+3. EMAIL NOTIFICATION INTEGRATION
+--------------------------------------------------------------------------------
+[R3.13] Approval Email:
+        - Subject must strictly be: "Your Loan Application has been Approved!"
+        - Body must strictly follow:
+          "Dear [User], your loan application for [loan amount] has been approved. Please check your dashboard for further details."
+[R3.14] Rejection Email:
+        - Subject must strictly be: "Your Loan Application has been Rejected"
+        - Body must strictly follow:
+          "Dear [User], we regret to inform you that your loan application has been rejected. Reason: [reason]. Please contact support for more details."
+
+4. ACCEPTANCE CHECKLIST
+--------------------------------------------------------------------------------
+[ ] Logged-in user can submit a loan application with amount, type, duration, income, and purpose.
+[ ] Submitting loan with 0 or negative amount/income is rejected.
+[ ] Loan status defaults to 'Pending' in MySQL database.
+[ ] User can view their submitted loan applications and current status.
+[ ] Admin can list all loan applications with applicant name and status.
+[ ] Admin can view comprehensive loan application details.
+[ ] Admin can approve a pending loan application.
+[ ] Approval dispatches exact approval email notification.
+[ ] Admin can reject a pending loan application with reason.
+[ ] Rejection dispatches exact rejection email notification with reason.
+[ ] All actions recorded in audit logs.
+[ ] Full backwards compatibility with Stage 1 & Stage 2 preserved.
+================================================================================

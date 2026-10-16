@@ -1,0 +1,85 @@
+================================================================================
+               STAGE 3: LOAN APPLICATION MANAGEMENT SYSTEM REQUIREMENTS
+================================================================================
+Source Document: Stage 3.pdf
+Component: Core Java Console Application with MySQL, JDBC, and Loan Operations
+
+--------------------------------------------------------------------------------
+USER STORY: LOAN APPLICATION MANAGEMENT SYSTEM
+--------------------------------------------------------------------------------
+"As a user, I want to apply for a loan after successful login, and as an admin,
+I want to review, approve, reject, or request additional information for loan applications."
+
+1. USER SIDE TASK: LOAN APPLICATION
+--------------------------------------------------------------------------------
+After a regular user successfully logs in, they should be able to apply for a loan:
+
+1.1 Loan Application Details:
+  - Loan Amount (loanAmount): Numeric (Double), must be positive (> 0).
+  - Loan Type (loanType): Personal, Home, Education, Car / Vehicle.
+  - Loan Duration (loanDuration): Duration in months (or years converted to months), must be > 0.
+  - Interest Rate (interestRate): Auto-filled based on selected loan type.
+    * Personal Loan: 10.5%
+    * Home Loan: 7.5%
+    * Education Loan: 5.0%
+    * Car / Vehicle Loan: 8.0%
+  - Annual Income (annualIncome): Numeric (Double), must be positive (> 0).
+  - Purpose of Loan (purpose): Brief description of why the loan is needed (mandatory).
+  - Status (status): Automatically defaults to 'Pending'.
+  - User ID (userId): Foreign key linking the loan application to the applicant.
+
+1.2 Validation & Submission:
+  - All form fields are mandatory except status (defaults to Pending).
+  - Loan amount and annual income must be positive numbers.
+  - Loan duration must be a valid integer greater than 0.
+  - Required inputs accepted using java.util.Scanner.
+  - Persisted to MySQL database table `loan_applications` via JDBC PreparedStatements.
+  - Inform applicant upon successful submission.
+
+2. ADMIN SIDE TASK: LOAN APPLICATION REVIEW
+--------------------------------------------------------------------------------
+Once a user applies for a loan, administrators review and take action.
+
+2.1 Loan Review Menu:
+  - Displays loan application summary:
+    * Loan ID
+    * User's Full Name
+    * Loan Amount
+    * Loan Type
+    * Application Date
+    * Status (Pending, Approved, Rejected, Needs More Info)
+
+2.2 Admin Review Actions:
+  1. View Loan Details:
+     - Applicant Name, Email, Mobile Number
+     - Loan Amount, Loan Type, Duration (months)
+     - Annual Income, Purpose, Application Date, Status
+     - Rejection Reason (if rejected)
+  2. Approve Loan:
+     - Updates status to 'Approved' in MySQL.
+     - Dispatches approval email notification.
+  3. Reject Loan:
+     - Updates status to 'Rejected' in MySQL.
+     - Prompts admin for mandatory rejection reason.
+     - Dispatches rejection email notification containing the reason.
+
+3. EMAIL NOTIFICATION SYSTEM
+--------------------------------------------------------------------------------
+Dispatches notifications to the applicant's email address upon admin decision:
+
+1. Loan Approved:
+   - Subject: "Your Loan Application has been Approved!"
+   - Body:
+     "Dear [User], your loan application for [loan amount] has been approved. Please check your dashboard for further details."
+
+2. Loan Rejected:
+   - Subject: "Your Loan Application has been Rejected"
+   - Body:
+     "Dear [User], we regret to inform you that your loan application has been rejected. Reason: [reason]. Please contact support for more details."
+
+4. ARCHITECTURAL & CONSTRAINTS COMPLIANCE
+--------------------------------------------------------------------------------
+- Console-based only (No Spring Boot, Spring MVC, or Spring Security).
+- All database operations executed using pure JDBC with PreparedStatements.
+- Stage 1 and Stage 2 functionalities remain completely undisturbed.
+================================================================================

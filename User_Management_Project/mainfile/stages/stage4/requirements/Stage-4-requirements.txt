@@ -1,0 +1,86 @@
+================================================================================
+          STAGE 4: INTEREST RATE CALCULATOR, PAN VALIDATION & CIBIL SCORE
+================================================================================
+Source Document: Stage 4.pdf
+Component: Core Java Console Application with MySQL, JDBC, PAN & CIBIL Engine
+
+--------------------------------------------------------------------------------
+USER STORY 1: INTEREST RATE CALCULATOR WITH PAN VALIDATION AND CIBIL SCORE
+--------------------------------------------------------------------------------
+"As a user, I want to provide my PAN card number and select a loan type so that
+the system can generate a CIBIL score and calculate the possible interest rate
+based on my CIBIL score."
+
+1. Input Requirements:
+   - PAN Card Number (String)
+   - Loan Type (Home Loan, Personal Loan, Education Loan, Vehicle Loan)
+   - Accepted using java.util.Scanner.
+
+2. Interest Rate Ranges per Loan Type:
+   - Home Loan: 6.5% – 8.5%
+   - Personal Loan: 9.0% – 12.0%
+   - Education Loan: 4.0% – 6.0%
+   - Vehicle Loan: 7.0% – 9.0%
+
+3. Backend Features:
+   3.1 PAN Validation:
+       - Must be exactly 10 characters long.
+       - Pattern: 5 uppercase letters [A-Z], followed by 4 digits [0-9], and 1 uppercase letter [A-Z].
+       - Regex: ^[A-Z]{5}[0-9]{4}[A-Z]{1}$
+       - Error Message on mismatch: "Invalid PAN format. Please enter a valid PAN."
+
+   3.2 Loan Type Validation:
+       - Valid values: Home Loan, Personal Loan, Education Loan, Vehicle Loan.
+       - Error Message on mismatch: "Invalid loan type selected."
+
+   3.3 CIBIL Score Generation:
+       - Generates a random 3-digit CIBIL score between 600 and 900.
+       - Persists CIBIL score and PAN to the database.
+
+   3.4 Interest Rate Calculation:
+       - Linearly adjusts interest rate within loan type range based on CIBIL score.
+       - Output Format:
+         "For PAN [PAN], with a CIBIL score of [CIBIL], the interest rate for [Loan Type] is [Rate]%."
+         Example: "For PAN ABCDE1234F, with a CIBIL score of 720, the interest rate for Home Loan is 7.5%."
+
+--------------------------------------------------------------------------------
+USER STORY 2: CIBIL SCORE CHECK AND AUTO-GENERATED CREDENTIALS
+--------------------------------------------------------------------------------
+"As a user, I want to provide my personal details and PAN card number so that the system
+can validate my information, automatically generate my username and password, send the
+credentials to my email, and generate my CIBIL score."
+
+1. Inputs:
+   - First Name (letters only, required)
+   - Last Name (letters only, required)
+   - Mobile Number (10 digits, required)
+   - Email Address (valid email format, required)
+   - Location (required)
+   - PAN Card (valid 10-char format, required)
+
+2. Username Auto-Generation Formula:
+   - First 3 letters of First Name
+   - First 3 letters of Last Name
+   - Last 4 digits of Mobile Number
+   - Example: Shivani + Chaudhari + 9876543210 -> "ShiCha3210"
+
+3. Password Auto-Generation Policy:
+   - Random 8–10 character password containing uppercase, lowercase, numbers, and special symbols.
+   - Example: "@Shiv!123"
+
+4. Email Dispatch of Credentials:
+   - Dispatches email to registered address.
+   - Subject: "Your Username and Password for Loan Application is"
+   - Body contains generated username and password.
+
+5. CIBIL Score & Seamless Transition to Loan Application:
+   - Generates and displays CIBIL score (600–900).
+   - Prompts user to immediately "Apply for Loan" using their newly created account.
+
+--------------------------------------------------------------------------------
+DATABASE EXTENSIONS:
+--------------------------------------------------------------------------------
+Add the following fields to `users` table:
+• `pancard` VARCHAR(10) NULL
+• `cibil_score` INT NULL
+================================================================================

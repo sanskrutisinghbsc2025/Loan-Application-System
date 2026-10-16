@@ -1,0 +1,51 @@
+================================================================================
+                    STAGE 1: IMPLEMENTATION FILES & ARCHITECTURE
+================================================================================
+
+1. OVERVIEW
+--------------------------------------------------------------------------------
+Stage 1 delivers the Core Java console-based User Management System, implementing:
+- User Registration (fname, lname, mobile, email, location, username, password)
+- User Authentication (Login by Username or Email + Password)
+- Post-Login Personalized Welcome Menu & Clean Logout
+- Forget Password Reset with policy enforcement
+- Account Lockout after 3 consecutive failed attempts (status set to 'Inactive')
+
+2. FILE ROSTER & PACKAGES
+--------------------------------------------------------------------------------
+Directory: shared/src/main/java/com/sit/loanapp/
+
+Package: com.sit.loanapp.config
+  * DatabaseConfig.java: Externalized configuration, connection factory, and test probes.
+
+Package: com.sit.loanapp.model
+  * User.java: Domain POJO representing user entity with Stage 1 fields and forward
+    compatibility field `userRole`.
+
+Package: com.sit.loanapp.dao
+  * UserDao.java: Interface defining DB operations.
+  * UserDaoImpl.java: JDBC implementation using PreparedStatements and safe connection handling.
+
+Package: com.sit.loanapp.service
+  * UserService.java: Service contract and result data structures (RegistrationResult, LoginResult, PasswordResetResult).
+  * UserServiceImpl.java: Core business rules, validation orchestrator, failed attempt counting,
+    and lockout mechanism.
+
+Package: com.sit.loanapp.util
+  * ValidationUtil.java: Regex-based validators for emails, 10-digit mobile, and password complexity.
+
+Package: com.sit.loanapp.ui
+  * InputReader.java: Robust Scanner wrapper eliminating newline skips.
+  * ConsoleMenu.java: Interactive console menu loop, prompts, and feedback messages.
+
+Package: com.sit.loanapp
+  * Main.java: Application entry point and startup diagnostic banner.
+
+3. TEST COVERAGE
+--------------------------------------------------------------------------------
+Directory: shared/tests/java/com/sit/loanapp/
+  * ValidationUtilTest.java: Unit tests for regex, mobile digits, and password complexity.
+  * UserDaoTest.java: In-memory H2 database integration tests for all JDBC queries/mutations.
+  * UserServiceTest.java: Full scenario tests for registration, login, attempt counter, lockout,
+    and password reset.
+================================================================================

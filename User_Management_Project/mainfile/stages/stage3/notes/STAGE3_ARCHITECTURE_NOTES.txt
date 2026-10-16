@@ -1,0 +1,53 @@
+================================================================================
+                    STAGE 3: ARCHITECTURE & TECHNICAL NOTES
+================================================================================
+
+1. DATABASE SCHEMA EXTENSION
+--------------------------------------------------------------------------------
+New Table: `loan_applications`
+  Column              Type               Constraints & Description
+  ------------------  -----------------  ---------------------------------------
+  id                  INT AUTO_INCREMENT PRIMARY KEY
+  user_id             INT NOT NULL       FOREIGN KEY (users.id) ON DELETE CASCADE
+  loan_amount         DOUBLE NOT NULL    Requested principal (> 0)
+  loan_type           VARCHAR(50)        Personal, Home, Education, Vehicle
+  loan_duration       INT NOT NULL       Duration in months (> 0)
+  interest_rate       DOUBLE NOT NULL    Auto-populated interest rate percentage
+  annual_income       DOUBLE NOT NULL    Applicant reported annual income
+  purpose             TEXT NOT NULL      Reason for loan
+  status              VARCHAR(30)        'Pending', 'Approved', 'Rejected', 'Needs More Info'
+  rejection_reason    TEXT NULL          Captured if status is 'Rejected'
+  application_date    DATETIME           Timestamp of submission
+  last_modified_date  DATETIME           Timestamp of decision / update
+
+2. SERVICE & DATA ACCESS INTEGRATION
+--------------------------------------------------------------------------------
+- Model: `com.sit.loanapp.model.LoanApplication`
+  POJO with full getters, setters, and formatted display helpers.
+- DAO: `com.sit.loanapp.dao.LoanDao` and `com.sit.loanapp.dao.LoanDaoImpl`
+  * `boolean createLoanApplication(LoanApplication app)`
+  * `Optional<LoanApplication> findById(int id)`
+  * `List<LoanApplication> findByUserId(int userId)`
+  * `List<LoanApplication> findAll()`
+  * `List<LoanApplication> findByStatus(String status)`
+  * `boolean updateStatus(int loanId, String status, String rejectionReason)`
+- Service: `com.sit.loanapp.service.LoanService` and `com.sit.loanapp.service.LoanServiceImpl`
+  * Validates financial bounds and business requirements.
+  * Auto-assigns interest rates.
+  * Dispatches Stage 3 approved/rejected email notifications via `NotificationService`.
+  * Logs administrative decisions in `audit_logs`.
+
+3. USER INTERFACE FLOW
+--------------------------------------------------------------------------------
+- Regular User:
+  Unlocks "2. Apply for Loan" in post-login menu:
+    * Selects Loan Type -> Auto-shows interest rate.
+    * Enters Amount, Duration (months), Annual Income, Purpose.
+    * Submits application and receives instant confirmation.
+  Adds "3. View My Loan Applications" to check application status in real time.
+- Admin Dashboard:
+  Adds "7. Review Loan Applications":
+    * Shows all applications in tabular format.
+    * Detailed review screen.
+    * 1-click Approve or Reject (with mandatory reason).
+================================================================================

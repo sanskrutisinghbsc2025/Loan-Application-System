@@ -1,0 +1,7 @@
+# Database Connection Configuration Example
+# Copy this file to db.properties and set your local MySQL credentials.
+
+db.url=jdbc:mysql://localhost:3306/loan_app_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+db.user=root
+db.password=your_mysql_password_here
+db.driver=com.mysql.cj.jdbc.Driver

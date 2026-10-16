@@ -1,0 +1,93 @@
+================================================================================
+                    STAGE 2: ADMIN MANAGEMENT SYSTEM REQUIREMENTS
+================================================================================
+Source Document: Stage 2.pdf
+Component: Core Java Console Application with MySQL, JDBC, and Admin Capabilities
+
+--------------------------------------------------------------------------------
+USER STORY: ADMIN MANAGEMENT SYSTEM
+--------------------------------------------------------------------------------
+"As an admin, I want to log in and manage users so that I can view, update, activate,
+deactivate, and delete users in the system."
+
+1. ADMIN LOGIN REQUIREMENTS:
+   - No Registration for Admin:
+     * Administrators do not register through the console application.
+     * Admin credentials must be predefined and stored directly in the MySQL database.
+   - Direct Login:
+     * Admin logs in directly using predefined username and password via the login prompt.
+     * Required login inputs accepted using java.util.Scanner.
+   - User Role:
+     * Differentiate between regular users and admins using `user_role`.
+     * Supported values: ROLE_USER and ROLE_ADMIN (or USER / ADMIN).
+   - Admin Exclusion from Failed Login Attempts:
+     * Administrators are NOT subject to account lockout.
+     * Failed login attempts counter is not enforced on admin accounts.
+
+2. ADMIN DASHBOARD:
+   - After successful admin authentication, display the Admin Dashboard menu in the console:
+     * Search Users
+     * View User Details
+     * Edit User Information
+     * Activate User
+     * Deactivate User
+     * Delete User
+     * Logout
+
+3. ADMIN ACTIONS ON USERS:
+   3.1 Search Users:
+       * Admin can search users by:
+         - First Name
+         - Last Name
+         - Email
+         - Mobile Number
+         - Username
+         - Status (Active / Inactive)
+       * Display tabular / formatted search results.
+
+   3.2 View User Details:
+       * Detailed view of a selected user:
+         - Full Name
+         - Email
+         - Mobile Number
+         - Status (Active or Inactive)
+         - Location
+         - Last Modified Date
+         - Failed Attempts count
+         - Associated Loan Applications (prepared for Stage 3)
+
+   3.3 Change User Status (Activate / Deactivate):
+       * Activate User: Sets status to 'Active' (and resets failed_attempts to 0, unlocking locked users).
+       * Deactivate User: Sets status to 'Inactive'.
+
+   3.4 Edit User Information:
+       * Admin can edit user attributes (fname, lname, mobile, email, location).
+       * Validation must be enforced (mandatory fields, 10-digit mobile, valid email format).
+
+   3.5 Delete User:
+       * Admin can delete a user record from the system.
+       * Must prompt for confirmation before deletion (e.g. "Confirm delete? (y/n)").
+       * Must log the deletion action for auditing purposes.
+
+4. NOTIFICATION SYSTEM FOR USERS:
+   - Every administrative action on a user sends an email notification to the affected user.
+   - Standard Email Subject: "Account Update Notification"
+   - Email Body Templates:
+     * Activation:
+       "Dear [First Name], your account has been successfully activated by the admin. You can now log in to the system."
+     * Deactivation:
+       "Dear [First Name], your account has been deactivated. Please contact support for more information."
+     * Deletion:
+       "Dear [First Name], your account has been deleted from the system. If this was a mistake, please contact support immediately."
+     * Edits:
+       "Dear [First Name], your account details have been updated. If you did not request this change, please contact support immediately."
+
+5. SECURITY & VALIDATION:
+   - Role-Based Access Control (RBAC):
+     * Only users with ROLE_ADMIN can access admin dashboard or execute admin actions.
+     * Regular users (ROLE_USER) cannot perform admin actions.
+   - Validation for Admin Actions:
+     * All inputs validated properly upon editing or searching.
+   - All operations performed via JDBC with PreparedStatements.
+   - All interactive inputs handled via java.util.Scanner.
+================================================================================

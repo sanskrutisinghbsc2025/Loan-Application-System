@@ -1,0 +1,69 @@
+================================================================================
+                    STAGE 2: IMPLEMENTATION FILES & ARCHITECTURE
+================================================================================
+
+1. OVERVIEW
+--------------------------------------------------------------------------------
+Stage 2 introduces the Admin Management System, building directly on the Stage 1 foundation:
+- Predefined Admin credentials in MySQL (Username: admin | Password: Admin@1234 | Role: ROLE_ADMIN)
+- Direct Login for Administrators routing straight to the Admin Dashboard
+- Admin Exclusion from failed login attempt lockout (admins are never locked out)
+- Role-Based Access Control (ROLE_ADMIN vs ROLE_USER)
+- Search Users (by First Name, Last Name, Email, Mobile, Username, Status, or All)
+- View Comprehensive User Details
+- Change User Status:
+  * Activate user (also unlocks locked users with failed_attempts reset to 0)
+  * Deactivate user (blocks login access)
+- Edit User Information with real-time validation
+- Delete User with confirmation guard and self-deletion prevention
+- User Notification System with specified email subject ("Account Update Notification")
+  and standardized body templates for Activation, Deactivation, Deletion, and Edits.
+- Audit Logging persisted to the `audit_logs` table for compliance.
+
+2. NEW / EXTENDED COMPONENTS IN SHARED
+--------------------------------------------------------------------------------
+Domain Models:
+  * User.java: Added ROLE_USER and ROLE_ADMIN constants and isAdmin() helper.
+  * AuditLog.java: POJO representing administrative audit events.
+
+Data Access Layer:
+  * UserDao.java & UserDaoImpl.java:
+    - searchUsers(criteria, term)
+    - findAllUsers()
+    - updateUser(user)
+    - setUserStatus(userId, status)
+    - deleteUser(userId)
+    - logAudit(auditLog)
+    - getRecentAuditLogs(limit)
+
+Business Logic Layer:
+  * UserService.java & UserServiceImpl.java:
+    - Updated login() to detect admin role, bypass lockout counter, and route directly.
+  * AdminService.java & AdminServiceImpl.java:
+    - Enforces RBAC checks (verifying admin role).
+    - Coordinates DB mutations, email notifications, and audit logging.
+  * NotificationService.java & ConsoleNotificationService.java:
+    - Dispatches notifications matching the Stage 2 email subject and body specifications.
+
+Presentation Layer:
+  * ConsoleMenu.java:
+    - Login router differentiating between admin and regular users.
+    - Full-featured interactive Admin Dashboard CLI with 8 actions.
+
+Database Layer:
+  * shared/sql/schema.sql: Added `audit_logs` table and indexed user_role.
+  * shared/sql/seed_stage2.sql: Predefined admin credentials and sample users.
+
+3. TEST COVERAGE
+--------------------------------------------------------------------------------
+Directory: shared/tests/java/com/sit/loanapp/
+  * AdminServiceTest.java: 7 comprehensive test suites covering:
+    - Admin direct login
+    - Admin immunity to lockout
+    - Multi-criteria search
+    - Activation & lockout recovery
+    - Deactivation & self-deactivation guard
+    - User editing & validation
+    - Deletion, confirmation, and self-deletion guard
+    - Role-based access control enforcement
+================================================================================

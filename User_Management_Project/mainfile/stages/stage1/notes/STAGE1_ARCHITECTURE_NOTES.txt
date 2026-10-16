@@ -1,0 +1,53 @@
+================================================================================
+                    STAGE 1: ARCHITECTURE & TECHNICAL NOTES
+================================================================================
+
+1. DOMAIN MODEL & DATABASE MAPPING
+--------------------------------------------------------------------------------
+The User entity coordinates all Stage 1 attributes with the MySQL `users` table:
+
+  Java Field          SQL Column           Data Type & Constraints
+  ------------------  -------------------  -------------------------------------
+  id                  id                   INT AUTO_INCREMENT PRIMARY KEY
+  fname               fname                VARCHAR(50) NOT NULL
+  lname               lname                VARCHAR(50) NOT NULL
+  mobile              mobile               VARCHAR(15) NOT NULL
+  email               email                VARCHAR(100) NOT NULL UNIQUE
+  location            location             VARCHAR(100)
+  lastModifiedDate    lastmodifieddate     DATETIME NOT NULL
+  status              status               VARCHAR(20) NOT NULL DEFAULT 'Active'
+  username            username             VARCHAR(50) NOT NULL UNIQUE
+  password            password             VARCHAR(255) NOT NULL
+  failedAttempts      failed_attempts      INT NOT NULL DEFAULT 0
+  userRole            user_role            VARCHAR(20) NOT NULL DEFAULT 'USER'
+
+* Forward Compatibility Note:
+  `user_role` is proactively included in the table schema with default 'USER'.
+  This guarantees full compatibility with Stage 2 (Admin Management System)
+  without breaking existing Stage 1 user records or requiring disruptive schema alterations.
+
+2. JDBC CONNECTION & TRANSACTION HANDLING
+--------------------------------------------------------------------------------
+- Connection Management: Handled via `com.sit.loanapp.config.DatabaseConfig`.
+  Uses standard JDBC `DriverManager.getConnection()`.
+- Clean Resources: All Statements, PreparedStatements, and ResultSets are wrapped in
+  Java try-with-resources blocks to prevent connection or statement leaks.
+- Parameterized Queries: All queries use `?` placeholders with `PreparedStatement`
+  to guarantee immunity from SQL Injection vulnerabilities.
+
+3. CONSOLE UI & SCANNER ROBUSTNESS
+--------------------------------------------------------------------------------
+- Common pitfall in Java CLI apps: `Scanner.nextInt()` leaves trailing newline characters
+  in the buffer, causing subsequent `Scanner.nextLine()` calls to read an empty line.
+- Resolution: Input reader utility `InputReader` uses `scanner.nextLine().trim()` for
+  all inputs, safely parsing numeric choices with fallback validation loops.
+- Clear and friendly CLI prompts with descriptive status banners and ASCII dividers.
+
+4. SEPARATION OF CONCERNS
+--------------------------------------------------------------------------------
+- `com.sit.loanapp.model`: Pure POJOs.
+- `com.sit.loanapp.dao`: JDBC persistence layer for database queries and mutations.
+- `com.sit.loanapp.service`: Business logic (validation orchestration, attempt incrementing, lockout enforcement).
+- `com.sit.loanapp.ui`: Console menu and user input flow.
+- `com.sit.loanapp.util`: Reusable validators (email regex, password rules, phone validation).
+================================================================================

@@ -1,0 +1,91 @@
+================================================================================
+STAGE 5: ARCHITECTURAL DESIGN & IMPLEMENTATION NOTES
+================================================================================
+
+1. COMPONENT ARCHITECTURE
+--------------------------------------------------------------------------------
+The Stage 5 implementation cleanly integrates with the existing layered architecture:
+
+  +-----------------------------------------------------------+
+  |              ConsoleMenu (UI Layer - Console)             |
+  +-----------------------------------------------------------+
+                               |
+                               v
+  +-----------------------------------------------------------+
+  |               LoanService / LoanServiceImpl               |
+  |     - calculateEmi(loanAmount, rate, duration)            |
+  |     - approveLoan(admin, loanId)                          |
+  |     - rejectLoan(admin, loanId, reason)                   |
+  +-----------------------------------------------------------+
+            |                                      |
+            v                                      v
+  +--------------------+               +-----------------------+
+  |  LoanDao / Impl    |               |  NotificationService  |
+  |  - updateLoanApproval              |  - sendLoanApproved... |
+  |  - mapResultSetToLoan              |    (7-parameter email)|
+  +--------------------+               +-----------------------+
+            |
+            v
+  +--------------------+
+  |  MySQL Database    |
+  |  (loan_applications|
+  |   audit_logs)      |
+  +--------------------+
+
+2. DATABASE SCHEMA EVOLUTION
+--------------------------------------------------------------------------------
+Table: loan_applications
+Columns added in Stage 5:
+- emi_amount     DOUBLE NULL DEFAULT 0.0
+- total_interest DOUBLE NULL DEFAULT 0.0
+- total_payable  DOUBLE NULL DEFAULT 0.0
+
+DDL Migration Statement:
+ALTER TABLE loan_applications
+    ADD COLUMN IF NOT EXISTS emi_amount DOUBLE NULL DEFAULT 0.0,
+    ADD COLUMN IF NOT EXISTS total_interest DOUBLE NULL DEFAULT 0.0,
+    ADD COLUMN IF NOT EXISTS total_payable DOUBLE NULL DEFAULT 0.0;
+
+3. LOAN APPROVAL SEQUENCE DIAGRAM
+--------------------------------------------------------------------------------
+Admin User              ConsoleMenu             LoanService          LoanDao          DB
+    |                        |                       |                  |              |
+    |-- Select Approve #ID ->|                       |                  |              |
+    |                        |-- approveLoan(admin,id)|                 |              |
+    |                        |                       |-- findById(id) ->|              |
+    |                        |                       |<- loanApp -------|              |
+    |                        |                       |                  |              |
+    |                        |                       |-- calculateEmi() |              |
+    |                        |                       |-- updateLoanApproval(id,emi,...)
+    |                        |                       |                  |-- UPDATE --->|
+    |                        |                       |                  |<- rows=1 ----|
+    |                        |                       |-- sendNotification(user, loan) -|
+    |                        |                       |-- logAudit(admin, "APPROVE_LOAN")
+    |                        |                       |                  |-- INSERT --->|
+    |                        |<- LoanActionResult --|                  |              |
+    |<- Display Breakdown ---|                       |                  |              |
+
+4. FORMULA NUMERICAL VERIFICATION
+--------------------------------------------------------------------------------
+Example 1:
+- Principal P = $100,000.00
+- Annual Interest Rate = 12.0%
+- Tenure n = 12 months
+- Monthly Rate r = (12.0 / 12) / 100 = 0.01
+- (1 + r)^n = 1.01^12 = 1.12682503
+- EMI = [100000 * 0.01 * 1.12682503] / [1.12682503 - 1] = 1126.82503 / 0.12682503
+  EMI = $8,884.88
+- Total Payable = $8,884.88 * 12 = $106,618.55
+- Total Interest = $106,618.55 - $100,000.00 = $6,618.55
+
+Example 2:
+- Principal P = $500,000.00 (Home Loan)
+- Annual Interest Rate = 7.5%
+- Tenure n = 240 months (20 years)
+- Monthly Rate r = (7.5 / 12) / 100 = 0.00625
+- (1 + r)^n = (1.00625)^240 = 4.46081704
+- EMI = [500000 * 0.00625 * 4.46081704] / [4.46081704 - 1]
+  EMI = $4,027.97
+- Total Payable = $4,027.97 * 240 = $966,713.06
+- Total Interest = $966,713.06 - $500,000.00 = $466,713.06
+================================================================================

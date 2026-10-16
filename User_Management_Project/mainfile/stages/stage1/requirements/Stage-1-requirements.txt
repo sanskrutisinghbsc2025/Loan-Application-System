@@ -1,0 +1,112 @@
+================================================================================
+                    STAGE 1: USER MANAGEMENT SYSTEM REQUIREMENTS
+================================================================================
+Source Document: Stage 1.pdf / Stage 1(1).pdf
+Component: Core Java Console Application with MySQL and JDBC
+
+--------------------------------------------------------------------------------
+USER STORY 1: USER REGISTRATION
+--------------------------------------------------------------------------------
+"As a user, I want to register through a console-based Core Java application
+so that my user information can be managed using MySQL and JDBC."
+
+1. Required User Attributes:
+   - First Name (fname) - String
+   - Last Name (lname) - String
+   - Mobile Number (mobile) - String / Numeric String (10 digits)
+   - Email Address (email) - String
+   - Location (location) - String
+   - Last Modified Date (lastmodifieddate) - Timestamp / DateTime
+   - Status (status) - String ('Active' by default upon registration)
+   - Username (username) - String (Unique identifier)
+   - Password (password) - String (Secured / Validated)
+
+2. Registration Validations:
+   - Mandatory Fields: fname, lname, mobile, email, username, and password must not be empty.
+   - Email Validation: Must conform to standard email syntax (e.g., user@domain.com).
+   - Password Policy:
+     * Minimum 8 characters in length.
+     * At least one uppercase letter (A-Z).
+     * At least one lowercase letter (a-z).
+     * At least one digit (0-9).
+     * At least one special character (e.g., @, #, $, %, ^, &, +, =, !, etc.).
+   - Username Uniqueness: Username must be unique across the system (check MySQL DB).
+   - Mobile Number Validation: Must be exactly 10 numeric digits.
+
+3. Registration Functionality:
+   - User account is persisted in MySQL database via JDBC only if all validations pass.
+   - Initial status is automatically set to "Active".
+   - lastmodifieddate is set to the current date/time when registration completes.
+   - All interactive user inputs are collected using java.util.Scanner.
+
+--------------------------------------------------------------------------------
+USER STORY 2: USER LOGIN
+--------------------------------------------------------------------------------
+"As a user, I want to log in using my credentials so that I can access the system."
+
+1. Login Credentials Allowed:
+   - (Email Address AND Password) OR
+   - (Username AND Password)
+
+2. Login Validations:
+   - Identifier and password fields must not be empty.
+   - If the user record does not exist or credentials do not match, display an appropriate
+     error message.
+   - If login succeeds, display an individualized welcome message:
+     "Welcome <First Name> <Last Name>" (e.g., "Welcome Amruta Patil").
+   - All inputs collected via java.util.Scanner.
+
+--------------------------------------------------------------------------------
+USER STORY 3: POST-LOGIN MENU & LOGOUT
+--------------------------------------------------------------------------------
+"After successful login, I want to view my personalized menu and have an option to logout."
+
+1. Post-Login Display:
+   - Display welcome banner: "Welcome, <fname> <lname>".
+   - Provide an option to Logout.
+2. Logout Behavior:
+   - When Logout is selected, end the session cleanly and return to the main console menu.
+
+--------------------------------------------------------------------------------
+USER STORY 4: FORGET PASSWORD (PASSWORD RESET)
+--------------------------------------------------------------------------------
+"As a user, I want to reset my password using my identifier if I forget my password."
+
+1. Password Reset Process:
+   - User initiates password reset by entering Email OR Username.
+   - System validates that the provided email or username corresponds to an active registered user.
+   - If valid, prompt the user for a new password.
+   - New password MUST strictly adhere to the same password policy as registration:
+     * Minimum 8 characters.
+     * At least one uppercase letter.
+     * At least one lowercase letter.
+     * At least one digit.
+     * At least one special character.
+   - Upon confirmation, update the password and refresh lastmodifieddate in MySQL database.
+
+--------------------------------------------------------------------------------
+USER STORY 5: USER ACCOUNT LOCKOUT
+--------------------------------------------------------------------------------
+"As a user, I want the system to track failed login attempts and automatically lock
+my account after 3 consecutive failed login attempts so that my account is protected."
+
+1. Failed Login Attempt Tracking:
+   - The system tracks failed login attempts for each registered user in the database.
+   - The column `failed_attempts` is incremented after every unsuccessful login attempt.
+   - Feedback after each failed attempt:
+     Inform the user how many attempts remain before account lockout:
+     * 1st failed attempt -> 2 attempts remaining.
+     * 2nd failed attempt -> 1 attempt remaining.
+     * 3rd failed attempt -> Account locked.
+
+2. Account Locking Mechanism:
+   - After 3 consecutive failed attempts:
+     * Status in MySQL database is updated from 'Active' to 'Inactive'.
+     * Display message: Account is locked and user must contact support.
+   - A locked user ('Inactive') is blocked from logging in.
+   - Account can only be unlocked manually by an administrator (or admin intervention).
+
+3. Attempt Counter Reset:
+   - When a user successfully logs in within their available chances, `failed_attempts`
+     is immediately reset to 0 (zero) in the database.
+================================================================================

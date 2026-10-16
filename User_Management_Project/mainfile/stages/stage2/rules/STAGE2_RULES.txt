@@ -1,0 +1,57 @@
+================================================================================
+                      STAGE 2: RULES & ACCEPTANCE CRITERIA
+================================================================================
+
+1. ROLE-BASED ACCESS CONTROL RULES
+--------------------------------------------------------------------------------
+[R2.1] Role Definition:
+       - Regular User: `ROLE_USER`
+       - Administrator: `ROLE_ADMIN`
+[R2.2] Direct Login Routing:
+       - If authenticated user has role `ROLE_ADMIN`, route to Admin Dashboard.
+       - If authenticated user has role `ROLE_USER`, route to User Post-Login Menu.
+[R2.3] Admin Exclusion:
+       - Admins do NOT have failed login attempt lockout restrictions applied.
+       - Admins cannot be registered via public registration flow.
+
+2. ADMIN DASHBOARD & ACTION RULES
+--------------------------------------------------------------------------------
+[R2.4] Search Criteria:
+       - Supports searching by First Name, Last Name, Email, Mobile, Username, or Status.
+       - Returns a formatted list of matching users.
+[R2.5] User Details View:
+       - Shows complete profile including status, failed attempts, and location.
+[R2.6] Activation & Deactivation:
+       - Activation sets `status = 'Active'` and resets `failed_attempts = 0`.
+       - Deactivation sets `status = 'Inactive'`.
+       - Cannot deactivate self (admin cannot deactivate their own active admin session).
+[R2.7] Edit User Information:
+       - Enforces standard validation (valid RFC email, 10-digit mobile, mandatory non-blank).
+       - Updates `lastmodifieddate` to CURRENT_TIMESTAMP.
+[R2.8] Deletion & Auditing:
+       - Mandatory confirmation prompt (y/n) required before deletion.
+       - Admin cannot delete their own account.
+       - Successful deletion creates an audit log entry with timestamp and admin identifier.
+
+3. NOTIFICATION DISPATCH RULES
+--------------------------------------------------------------------------------
+[R2.9] Notification Trigger:
+       - Every status change (activate/deactivate), user edit, and user deletion triggers an email notification.
+       - Subject must strictly be: "Account Update Notification".
+       - Body must dynamically incorporate the target user's first name: "Dear [First Name], ...".
+
+4. ACCEPTANCE CHECKLIST
+--------------------------------------------------------------------------------
+[ ] Predefined admin account exists in database and logs in directly.
+[ ] Regular users cannot access the Admin Dashboard.
+[ ] Admin accounts are immune to 3-strike failed login lockout.
+[ ] Admin can search users by fname, lname, email, mobile, username, and status.
+[ ] Admin can view comprehensive user details.
+[ ] Admin can activate an inactive/locked user (unlocks user for login).
+[ ] Admin can deactivate an active user.
+[ ] Admin can edit user information with validation.
+[ ] Admin can delete a user after confirmation, generating an audit log.
+[ ] Email notification is generated and dispatched for each admin action.
+[ ] Admin logout cleanly returns to main console menu.
+[ ] Stage 1 user registration, login, and lockout remain 100% functional without regression.
+================================================================================

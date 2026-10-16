@@ -1,0 +1,88 @@
+================================================================================
+STAGE 5: CODE & ARCHITECTURE OVERVIEW
+================================================================================
+
+1. MODULE PURPOSE
+--------------------------------------------------------------------------------
+Stage 5 introduces automated Equated Monthly Installment (EMI) calculation, total
+interest computation, total payable amount aggregation, database persistence of
+EMI metrics, and comprehensive 7-point email notifications to loan applicants
+upon administrative loan approval.
+
+2. KEY CLASSES AND METHODS
+--------------------------------------------------------------------------------
+2.1 Domain Model:
+- com.sit.loanapp.model.LoanApplication
+  * Added fields:
+    - private double emiAmount;
+    - private double totalInterest;
+    - private double totalPayable;
+  * Added getters & setters:
+    - getEmiAmount(), setEmiAmount(double)
+    - getTotalInterest(), setTotalInterest(double)
+    - getTotalPayable(), setTotalPayable(double)
+  * Updated toString() to display EMI and Total Payable when populated.
+
+2.2 Data Access Layer:
+- com.sit.loanapp.dao.LoanDao
+  * boolean updateLoanApproval(int loanId, double emiAmount, double totalInterest, double totalPayable);
+- com.sit.loanapp.dao.LoanDaoImpl
+  * PreparedStatement JDBC update persisting status='Approved', emi_amount,
+    total_interest, total_payable, last_modified_date=NOW().
+  * mapResultSetToLoan extracts emi_amount, total_interest, and total_payable.
+
+2.3 Service Layer:
+- com.sit.loanapp.service.LoanService
+  * Nested class EmiCalculation (emiAmount, totalInterest, totalPayable).
+  * EmiCalculation calculateEmi(double loanAmount, double annualInterestRate, int durationMonths);
+  * LoanActionResult approveLoan(User admin, int loanId);
+- com.sit.loanapp.service.LoanServiceImpl
+  * calculateEmi: Mathematical formula implementation:
+    r = (annualInterestRate / 12) / 100
+    factor = (1 + r)^n
+    EMI = [P * r * factor] / [factor - 1]
+    Total Payable = EMI * n
+    Total Interest = Total Payable - P
+  * approveLoan:
+    1. Validates admin credentials and role (ROLE_ADMIN).
+    2. Calculates EMI metrics via calculateEmi().
+    3. Persists approval and calculated values to MySQL via LoanDao.
+    4. Dispatches 7-point email notification via NotificationService.
+    5. Records action in audit_logs table.
+
+2.4 Notification Layer:
+- com.sit.loanapp.service.NotificationService
+  * void sendLoanApprovedNotification(String userEmail, String userName, LoanApplication loan);
+- com.sit.loanapp.service.ConsoleNotificationService
+  * Formats and logs formal approval email containing:
+    1. Sanctioned Loan Amount
+    2. Loan Type
+    3. Loan Tenure (months)
+    4. Applied Interest Rate (%)
+    5. Monthly EMI Amount
+    6. Total Interest Amount
+    7. Total Payable Amount
+
+2.5 User Interface Layer:
+- com.sit.loanapp.ui.ConsoleMenu
+  * Enhanced printLoanTable to include Monthly EMI column.
+  * Enhanced printLoanDetails to display full Approved Loan EMI Breakdown.
+  * Enhanced admin approval feedback message with calculated financial metrics.
+
+3. PERSISTENCE & SCHEMA MIGRATION
+--------------------------------------------------------------------------------
+- shared/sql/schema.sql:
+  Added columns to loan_applications:
+    emi_amount DOUBLE NULL DEFAULT 0.0,
+    total_interest DOUBLE NULL DEFAULT 0.0,
+    total_payable DOUBLE NULL DEFAULT 0.0
+- shared/sql/seed_stage5.sql:
+  Seed data demonstrating approved loan with persisted EMI metrics and audit log.
+
+4. AUTOMATED TESTS
+--------------------------------------------------------------------------------
+- com.sit.loanapp.LoanServiceTest
+  * testEmiCalculationFormulaAccuracy (Verifies exact amortization values).
+  * testStage5ApprovalEmiPersistenceAndNotificationFields (Verifies JDBC persistence & 7 email fields).
+  * All 75 tests passing across entire project test suite.
+================================================================================

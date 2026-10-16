@@ -1,0 +1,89 @@
+================================================================================
+                     LOAN APPLICATION SYSTEM - PROJECT RULES
+================================================================================
+
+1. OVERVIEW AND STAGE-BASED ARCHITECTURE
+--------------------------------------------------------------------------------
+- This project is developed incrementally across multiple discrete stages.
+- The root directory structure is strictly anchored at `mainfile/`.
+- Every stage document, extracted requirement set, stage-specific rules, and stage-specific
+  code notes must reside inside `mainfile/stages/stage<N>/`.
+- Shared code, database infrastructure, reusable tests, and common documentation
+  must reside inside `mainfile/shared/`.
+- Never duplicate code unnecessarily between stages.
+- Never remove, break, or regress earlier-stage functionality when introducing new stages
+  unless an explicit requirement supersedes previous behavior.
+- Document cross-stage trade-offs, evolution, or assumptions in `shared/docs/DECISIONS_AND_ASSUMPTIONS.md`.
+
+2. STAGE LIFECYCLE MANAGEMENT
+--------------------------------------------------------------------------------
+When a new stage document (e.g., Stage 2, Stage 3, Stage 4, Stage 5) is provided:
+  a. Identify stage number and scope.
+  b. Create `mainfile/stages/stage<N>/` with subfolders:
+     - `source-files/`: contains original stage document unmodified.
+     - `requirements/`: contains extracted plain-text requirements.
+     - `rules/`: contains stage-specific rules and acceptance checklist.
+     - `notes/`: contains architecture and design notes.
+     - `code/`: contains stage-specific code notes, runner, and delta explanation.
+  c. Compare new requirements against earlier stages to determine shared vs. stage-specific logic.
+  d. Update shared code, SQL schemas, and tests without rewriting working code.
+  e. Update the root README and this rule file with any lasting project requirements.
+  f. Verify build, tests, and backwards compatibility.
+
+3. ROLE-BASED ACCESS CONTROL (RBAC) - STAGE 2
+--------------------------------------------------------------------------------
+- User Roles:
+  * Regular User (`ROLE_USER`): Access to registration, login, profile view, password reset,
+    loan applications, and CIBIL tools.
+  * Administrator (`ROLE_ADMIN`): Access to Admin Dashboard, user management, status toggle,
+    user editing, user deletion, loan review (approvals/rejections), and audit inspection.
+- Direct Login Routing:
+  * Successful authentication automatically checks `user_role` and launches either
+    User Post-Login Menu or Admin Dashboard.
+- Admin Protection:
+  * Administrators are EXCLUDED from the 3-attempt account lockout mechanism.
+  * Administrators cannot deactivate or delete their own administrative account.
+  * Administrators cannot register via the public user registration wizard.
+
+4. LOAN MANAGEMENT RULES - STAGE 3
+--------------------------------------------------------------------------------
+- Form Validation:
+  * Loan amount, duration (months), and annual income must be positive numbers (> 0).
+  * Loan type and purpose are strictly mandatory.
+  * Initial status is automatically set to 'Pending'.
+- Loan Review & Decisions:
+  * Only users with `ROLE_ADMIN` can approve or reject loan applications.
+  * Rejection strictly requires a mandatory rejection reason.
+  * Approvals and rejections must be recorded in `audit_logs`.
+- Email Notification Enforcement:
+  * Loan Approved Subject: "Your Loan Application has been Approved!"
+  * Loan Rejected Subject: "Your Loan Application has been Rejected"
+
+5. CIBIL & PAN VALIDATION RULES - STAGE 4
+--------------------------------------------------------------------------------
+- PAN Card Validation:
+  * Regex: ^[A-Z]{5}[0-9]{4}[A-Z]{1}$
+  * Invalid message: "Invalid PAN format. Please enter a valid PAN."
+- Loan Type Validation:
+  * Invalid message: "Invalid loan type selected."
+- Interest Rate Calculation Ranges:
+  * Home Loan: 6.5% – 8.5%
+  * Personal Loan: 9.0% – 12.0%
+  * Education Loan: 4.0% – 6.0%
+  * Vehicle Loan: 7.0% – 9.0%
+- Output Format:
+  "For PAN <PAN>, with a CIBIL score of <CIBIL>, the interest rate for <Loan Type> is <Rate>%."
+- Auto-Generated Credentials:
+  * Username: First 3 letters fname + First 3 letters lname + Last 4 mobile (e.g. ShiCha3210).
+  * Password: 8-10 chars with letters, numbers, and symbols (e.g. @Shiv!123).
+  * Credential Email Subject: "Your Username and Password for Loan Application is"
+
+6. PORTABILITY & PACKAGING
+--------------------------------------------------------------------------------
+- Platform Launchers:
+  * Provide `run-linux.sh` with execution permissions for Linux / KDE Plasma.
+  * Provide `run-windows.bat` for Windows environments.
+- Packaging:
+  * Final archive named `User_Management_Project.zip`.
+  * Archive root must strictly contain the `mainfile/` directory directly.
+================================================================================

@@ -1,0 +1,65 @@
+================================================================================
+                      STAGE 1: RULES & ACCEPTANCE CRITERIA
+================================================================================
+
+1. MANDATORY VALIDATION RULES
+--------------------------------------------------------------------------------
+[R1.1] First name and last name must not be blank/whitespace.
+[R1.2] Mobile number must consist of exactly 10 numerical digits [0-9]{10}.
+[R1.3] Email must be well-formed according to standard RFC email patterns.
+[R1.4] Password must be at least 8 characters long, including at least one uppercase
+       letter [A-Z], at least one lowercase letter [a-z], at least one number [0-9],
+       and at least one special character [!@#$%^&*()_+=\-{}\[\]:;"'<>,.?/\\|~`].
+[R1.5] Username must be unique across all existing user records in MySQL.
+[R1.6] Email must be unique across all existing user records in MySQL.
+[R1.7] Initial user status MUST be set to 'Active'.
+[R1.8] `lastmodifieddate` must be populated with current system timestamp on registration
+       and updated on password reset.
+
+2. AUTHENTICATION & LOCKOUT RULES
+--------------------------------------------------------------------------------
+[R2.1] Login lookup must work seamlessly using either username or email as the identifier.
+[R2.2] On successful login:
+       - Output greeting: "Welcome <fname> <lname>" (e.g., "Welcome Amruta Patil").
+       - Reset `failed_attempts` column in MySQL to 0.
+[R2.3] On failed login attempt (valid identifier but incorrect password):
+       - Increment `failed_attempts` by 1.
+       - If `failed_attempts` < 3: display "Invalid password. <N> attempt(s) remaining before account lockout."
+       - If `failed_attempts` >= 3:
+         * Update database `status` to 'Inactive'.
+         * Set `failed_attempts` to 3.
+         * Display: "Your account is locked due to 3 consecutive failed login attempts. Please contact support."
+[R2.4] If an account is already 'Inactive' / locked:
+       - Prevent login attempt immediately.
+       - Display: "Your account is locked/inactive. Please contact support."
+[R2.5] If the username/email does not exist:
+       - Display: "User not found. Please register or check your credentials."
+
+3. FORGOT PASSWORD RULES
+--------------------------------------------------------------------------------
+[R3.1] System prompts for username or email.
+[R3.2] System verifies the user exists and is in 'Active' status.
+[R3.3] If account is locked/inactive, refuse reset and direct user to support.
+[R3.4] System prompts for new password and validates against the Stage 1 password policy.
+[R3.5] Database is updated with the new password and `lastmodifieddate` is set to NOW().
+
+4. POST-LOGIN MENU RULES
+--------------------------------------------------------------------------------
+[R4.1] Display header: "Welcome, <fname> <lname>".
+[R4.2] Option 1: Logout -> clean return to main menu.
+[R4.3] Keep modular design to easily accommodate Stage 2 (Admin Menu) and Stage 3 (Loan Application).
+
+5. ACCEPTANCE CHECKLIST
+--------------------------------------------------------------------------------
+[ ] User registration with valid inputs persists to MySQL database.
+[ ] User registration with invalid email / mobile / weak password displays specific error and rejects.
+[ ] Duplicate username registration is rejected.
+[ ] Login with username & valid password succeeds with "Welcome <fname> <lname>".
+[ ] Login with email & valid password succeeds with "Welcome <fname> <lname>".
+[ ] Failed login attempt increments counter and shows remaining attempts.
+[ ] 3rd failed login locks account and sets status='Inactive' in MySQL.
+[ ] Locked account cannot login and informs user to contact support.
+[ ] Successful login resets counter to 0.
+[ ] Forgot password reset validates policy and updates MySQL.
+[ ] Logout returns user to main menu cleanly.
+================================================================================

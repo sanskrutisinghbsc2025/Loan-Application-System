@@ -1,0 +1,124 @@
+## IMPORTANT: STAGE-BASED PROJECT STRUCTURE AND EMAIL ZIP PACKAGING
+
+The supplied PDF is a Stage 1 requirement document. It is not the entire project. More stage documents will be provided later, and each stage must be stored separately while remaining part of the same main project.
+
+### 1. Required directory structure
+
+Create a top-level directory named `mainfile`. Organize the project as follows:
+
+mainfile/
+├── README.txt
+├── prompts/
+│   └── ANTIGRAVITY_PROMPT.txt
+├── rules/
+│   └── PROJECT_RULES.txt
+├── stages/
+│   ├── stage1/
+│   │   ├── source-files/
+│   │   │   └── Stage 1(1).pdf
+│   │   ├── requirements/
+│   │   │   └── Stage-1-requirements.txt
+│   │   ├── code/
+│   │   │   └── Stage 1 implementation files and notes
+│   │   ├── rules/
+│   │   │   └── STAGE1_RULES.txt
+│   │   └── notes/
+│   │
+│   ├── stage2/
+│   │   └── Create when Stage 2 documents are provided
+│   │
+│   └── stage3/
+│       └── Create when Stage 3 documents are provided
+│
+├── shared/
+│   ├── src/
+│   ├── tests/
+│   ├── sql/
+│   └── docs/
+│
+├── pom.xml
+├── run-linux.sh
+└── run-windows.bat
+
+This is the required organizational structure. Adjust the internal Java package layout when technically necessary, but preserve the top-level `mainfile/` directory and the separation between stages.
+
+### 2. Stage management rules
+
+- Treat each supplied stage document as a separate part of the overall project.
+- Store the original document unchanged inside its corresponding stage's `source-files/` directory.
+- Store extracted requirements in that stage's `requirements/` directory.
+- Store stage-specific implementation notes and code in that stage's `code/` directory.
+- Store stage-specific rules and acceptance criteria in that stage's `rules/` directory.
+- Keep shared code, database infrastructure, reusable tests, and common documentation in appropriate shared locations.
+- Do not duplicate shared source code unnecessarily between stages.
+- Maintain a root project README explaining how the stages fit together.
+- Update the root project rules when new stages introduce lasting requirements.
+- Record conflicts between stages in a decisions and assumptions log.
+- Do not remove or break earlier-stage functionality unless a new requirement explicitly changes it.
+
+### 3. Handling future stage documents
+
+Whenever I provide a new stage document:
+
+1. Identify the stage number from the document or ask me if it is unclear.
+2. Create the appropriate directory, such as `mainfile/stages/stage2/`.
+3. Preserve the original document.
+4. Extract its requirements into a plain-text file.
+5. Create or update the stage-specific rules and acceptance checklist.
+6. Compare the new requirements against all relevant earlier stages.
+7. Identify dependencies, conflicts, and shared functionality.
+8. Update the implementation and tests without unnecessarily rewriting working code.
+9. Update the root README and project rules.
+10. Verify that the complete project remains buildable.
+
+### 4. Email ZIP requirements
+
+The final deliverable must be a single ZIP archive named:
+
+`User_Management_Project.zip`
+
+The ZIP must contain the entire `mainfile/` directory at its root.
+
+Expected archive structure:
+
+User_Management_Project.zip
+└── mainfile/
+    ├── README.txt
+    ├── prompts/
+    ├── rules/
+    ├── stages/
+    │   └── stage1/
+    ├── shared/
+    ├── pom.xml
+    ├── run-linux.sh
+    └── run-windows.bat
+
+When the recipient extracts the archive, they must get the `mainfile/` directory and all its contents, not a collection of unrelated files.
+
+The ZIP must contain the stage requirements, source code, rules, documentation, SQL files, tests, and platform-specific launch scripts required by the project.
+
+Exclude database passwords, credentials, local secret configuration files, personal data, logs containing sensitive information, IDE caches, temporary files, and unnecessary build artifacts.
+
+### 5. KDE Linux and Windows compatibility
+
+Develop and test the project on KDE Plasma Linux while keeping the source code portable to Windows.
+
+Include separate setup instructions for both operating systems. The recipient must be able to extract the ZIP, install the required Java/Maven/MySQL dependencies, configure their own database credentials, create the schema, and run the project.
+
+Do not include machine-specific absolute paths or rely on Linux-only commands in the Java application.
+
+### 6. Final verification
+
+Before delivering the ZIP:
+
+- Verify the complete directory hierarchy.
+- Verify that every supplied stage document is included in the correct stage directory.
+- Verify that shared code and stage-specific files are organized correctly.
+- Run the available build and tests.
+- Inspect the ZIP contents.
+- Check for accidentally included secrets.
+- Report test results and unresolved limitations accurately.
+
+Do not send emails automatically. Create the ZIP locally so I can review it and send it myself.
+
+**The central rule is that every stage belongs inside `mainfile/`, and the entire `mainfile/` directory must be packaged into the final email ZIP.**

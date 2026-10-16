@@ -1,0 +1,40 @@
+================================================================================
+                    STAGE 2: ARCHITECTURE & TECHNICAL NOTES
+================================================================================
+
+1. SCHEMA EVOLUTION & AUDIT LOGGING
+--------------------------------------------------------------------------------
+- User Role Integration:
+  The `user_role` column added during Stage 1 foundation is mapped to `ROLE_USER` and `ROLE_ADMIN`.
+- Audit Log Infrastructure:
+  Added table `audit_logs` to record administrative operations:
+    * id (INT PRIMARY KEY AUTO_INCREMENT)
+    * admin_username (VARCHAR(50))
+    * action (VARCHAR(50)) - 'ACTIVATE_USER', 'DEACTIVATE_USER', 'EDIT_USER', 'DELETE_USER'
+    * target_user_id (INT)
+    * target_username (VARCHAR(50))
+    * details (TEXT)
+    * created_at (DATETIME)
+
+2. EMAIL NOTIFICATION ARCHITECTURE
+--------------------------------------------------------------------------------
+- Notification Service Interface: `com.sit.loanapp.service.NotificationService`
+- Decoupled Implementation:
+  Provides a clean, pluggable console email dispatcher (formatting full email headers,
+  to address, subject, and body) with optional SMTP properties.
+- Guarantees immediate, visible feedback during console evaluation while supporting
+  real SMTP configuration when credentials are provided in `db.properties` or environment.
+
+3. ADMIN SERVICE & DAO EXTENSIONS
+--------------------------------------------------------------------------------
+- New DAO methods in `UserDao`:
+  * `List<User> searchUsers(String query, String criteria)`
+  * `boolean deleteUser(int userId)`
+  * `boolean logAudit(String adminUsername, String action, Integer targetUserId, String targetUsername, String details)`
+- New Service interface & implementation:
+  * `AdminService` / `AdminServiceImpl` providing business validations, RBAC checks,
+    notification triggering, and audit recording.
+- Console Menu updates:
+  * `ConsoleMenu` routes `ROLE_ADMIN` users to `AdminDashboard`.
+  * Modular sub-menus for search, edit, activate/deactivate, and delete.
+================================================================================

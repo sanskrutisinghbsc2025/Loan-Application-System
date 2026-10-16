@@ -1,0 +1,42 @@
+================================================================================
+                      STAGE 4: RULES & ACCEPTANCE CRITERIA
+================================================================================
+
+1. PAN & CIBIL VALIDATION RULES
+--------------------------------------------------------------------------------
+[R4.1] PAN format must match: 5 alphabets + 4 digits + 1 alphabet (case-insensitive conversion to uppercase).
+       - Invalid error message: "Invalid PAN format. Please enter a valid PAN."
+[R4.2] Loan Type must be one of: "Home Loan", "Personal Loan", "Education Loan", "Vehicle Loan".
+       - Invalid error message: "Invalid loan type selected."
+[R4.3] CIBIL Score range: strictly between 600 and 900 inclusive [600, 900].
+[R4.4] Interest rate calculation must strictly map within the defined ranges:
+       - Home Loan: 6.5% to 8.5%
+       - Personal Loan: 9.0% to 12.0%
+       - Education Loan: 4.0% to 6.0%
+       - Vehicle Loan: 7.0% to 9.0%
+[R4.5] Calculation Output Format:
+       "For PAN <PAN>, with a CIBIL score of <CIBIL>, the interest rate for <Loan Type> is <Rate>%."
+
+2. AUTO-GENERATION OF CREDENTIALS
+--------------------------------------------------------------------------------
+[R4.6] Generated Username format:
+       First 3 letters of First Name + First 3 letters of Last Name + Last 4 digits of Mobile.
+       Example: fname="Shivani", lname="Chaudhari", mobile="9876543210" -> "ShiCha3210"
+[R4.7] Generated Password format:
+       8–10 characters with uppercase, lowercase, numbers, and special symbols (e.g. "@Shiv!123").
+[R4.8] Credential Email Subject:
+       "Your Username and Password for Loan Application is"
+
+3. ACCEPTANCE CHECKLIST
+--------------------------------------------------------------------------------
+[ ] PAN validation accepts valid PAN (e.g. ABCDE1234F) and rejects invalid formats.
+[ ] Loan type validation restricts inputs to predefined types.
+[ ] CIBIL score generated is bounded between 600 and 900.
+[ ] Interest rates calculated accurately based on CIBIL score and loan type.
+[ ] Exact output string matches Stage 4 specification.
+[ ] Auto-generated username matches first 3 letters fname + first 3 letters lname + last 4 mobile.
+[ ] Auto-generated password meets complexity rules.
+[ ] Email with generated credentials dispatched to user.
+[ ] User profile saved with `pancard` and `cibil_score` in database.
+[ ] Seamless transition offered to apply for loan after CIBIL check.
+================================================================================

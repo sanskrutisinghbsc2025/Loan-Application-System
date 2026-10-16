@@ -1,0 +1,32 @@
+================================================================================
+                    STAGE 4: ARCHITECTURE & TECHNICAL NOTES
+================================================================================
+
+1. DATABASE EXTENSIONS
+--------------------------------------------------------------------------------
+ALTER TABLE `users` ADD:
+  - `pancard VARCHAR(10) NULL`
+  - `cibil_score INT NULL`
+
+2. CIBIL & INTEREST RATE ENGINE
+--------------------------------------------------------------------------------
+- Range Mapping Formula:
+  Higher CIBIL score (closer to 900) yields favorable (lower) interest rate.
+  Lower CIBIL score (closer to 600) yields higher interest rate.
+    normalized = (900.0 - cibilScore) / 300.0; // 0.0 at 900, 1.0 at 600
+    calculatedRate = minRate + normalized * (maxRate - minRate);
+
+- Service Component: `com.sit.loanapp.service.CibilService` & `CibilServiceImpl`
+  * `boolean isValidPan(String pan)`
+  * `int generateCibilScore()` (random 600-900)
+  * `double calculateInterestRate(String loanType, int cibilScore)`
+  * `String generateUsername(String fname, String lname, String mobile)`
+  * `String generatePassword()` (8-10 chars with letter, digit, symbol)
+  * `CibilOnboardingResult onboardUserWithCibil(...)`
+
+3. NOTIFICATION DISPATCH
+--------------------------------------------------------------------------------
+- Added credential email dispatcher:
+  Subject: "Your Username and Password for Loan Application is"
+  Body: Contains newly generated username and password.
+================================================================================
